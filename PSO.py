@@ -18,19 +18,31 @@ class ParticleSwarm:
                 randIndex = random.randint(0, len(self.dataset) - 1)
                 particle.append(self.dataset[randIndex])
             population.append(particle)
-        for p in population:
-            print p
-
         return population
 
     # def fitness_funct():
     #     return fitness
 
     def cluster(self):
-        pBest = self.select_pop()
+        pop = self.select_pop()
+        pBest = pop
+        pBestFitness = [1000] * len(pop)
         gBest = []
-
-
+        gBestFitness = [1000]
+        for particle in pop:
+            clusters = []
+            for i in range(self.clusters):
+                c = []
+                clusters.append(c)
+            for d in self.dataset:
+                closest = [1000, 0]
+                for i in range(len(particle)):
+                    dist = np.linalg.norm(d.features - particle[i].features)
+                    if dist < closest[0]:
+                        closest = [dist, i]
+                clusters[closest[1]].append(d)
+            for i in range(len(clusters)):
+                print i, len(clusters[i])
 
 
 class Instance:
