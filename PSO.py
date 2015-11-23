@@ -20,29 +20,36 @@ class ParticleSwarm:
             population.append(particle)
         return population
 
-    # def fitness_funct():
-    #     return fitness
 
     def cluster(self):
-        pop = self.select_pop()
-        pBest = pop
+        pop = self.select_pop() #pick population
+        pBest = pop #initialize best particles
         pBestFitness = [1000] * len(pop)
         gBest = []
-        gBestFitness = [1000]
+        gBestFitness = 1000
         for particle in pop:
-            clusters = []
+            clust = []
             for i in range(self.clusters):
                 c = []
-                clusters.append(c)
-            for d in self.dataset:
+                clust.append(c)
+            for d in self.dataset:  #set particle to cluster with nearest centroid
                 closest = [1000, 0]
                 for i in range(len(particle)):
                     dist = np.linalg.norm(d.features - particle[i].features)
                     if dist < closest[0]:
                         closest = [dist, i]
-                clusters[closest[1]].append(d)
-            for i in range(len(clusters)):
-                print i, len(clusters[i])
+                clust[closest[1]].append(d)
+            fitness = 0
+            for i in range(len(clust)): #evaluate fitness of particle
+                for c in clust[i]:
+                    fitness += (np.linalg.norm(c.features - particle[i].features) / len(clust[i]))
+            fitness = fitness / len(clust)
+            if fitness < gBestFitness:
+                gBestFitness = fitness
+                gBest = particle
+            if fitness < pBestFitness[pop.index(particle)]:
+                pBestFitness[pop.index(particle)] = fitness
+                pop[pop.index(particle)] = particle
 
 
 class Instance:
