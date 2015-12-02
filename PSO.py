@@ -4,12 +4,13 @@ import random
 
 class ParticleSwarm:
 
-    def __init__(self, dataset, popSize, clusters, tune1, tune2):
+    def __init__(self, dataset, popSize, clusters, tune1, tune2, inertia):
         self.dataset = dataset
         self.popSize = popSize
         self.numClusters = clusters
         self.tune1 = tune1
         self.tune2 = tune2
+        self.inertia = inertia
         self.cluster()
 
     #select population from dataset
@@ -31,7 +32,8 @@ class ParticleSwarm:
         velocity = np.zeros((len(pop), self.numClusters, len(self.dataset[0])))
         gBest = []
         gBestFitness = 1000
-        for runs in range(100):
+        popDistance = 100
+        while popDistance > 0.005:
             for index, particle in enumerate(pop):
                 clust = []
                 for i in range(self.numClusters):
@@ -61,8 +63,30 @@ class ParticleSwarm:
                 pBestMinus = self.p_mult(pBestMinus, self.tune1)
                 gBestMinus = self.p_mult(gBestMinus, self.tune2)
                 gBestMinus = np.add(pBestMinus, gBestMinus)
-                velocity[index] = np.add(gBestMinus, velocity[index])
+                velocity[index] = np.add(gBestMinus, self.p_mult(velocity[index], self.inertia))
                 pop[index] = self.p_add(particle, velocity[index])
+            #calculate average euclidean distance between particles
+            for index, particle in enumerate(pop):
+                if index > 0:
+                    for i in range(len(particle)):
+                        popDistance += (np.linalg.norm(pop[index - 1][i] - particle[i]) / len(particle))
+            popDistance = popDistance / len(pop)
+            print popDistance
+        #calc final clusters and print info
+        clust = []
+        for i in range(self.numClusters):
+            c = []
+            clust.append(c)
+        for d in self.dataset:  #set particle to cluster with nearest centroid
+            closest = [1000, 0]
+            for i in range(len(gBest)):
+                dist = np.linalg.norm(d - gBest[i])
+                if dist < closest[0]:
+                     closest = [dist, i]
+            clust[closest[1]].append(d)
+        for i in range(len(clust)):
+            print len(clust[i])
+        print gBest
 
 
     #method for adding particles to each other
@@ -91,6 +115,8 @@ class ParticleSwarm:
                 v[j] = v[j] * particle[i][j]
         return rVector
 
+
+
 class Instance:
     # This is a simple encapsulation of a `input signal : output signal`
     # pair in out training set.
@@ -116,7 +142,8 @@ def main():
             variables = np.array(variables)
             dataset.append(variables)
 
-    pso = ParticleSwarm(dataset, 10, 3, 1.0, 1.0)
+    #dataset, number pf particles, number of clusters, param1, param2, inertia
+    pso = ParticleSwarm(dataset, 10, 2, 2.0, 2.0, 0.5)
 
 
 if __name__ == '__main__':
