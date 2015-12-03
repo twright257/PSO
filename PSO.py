@@ -71,8 +71,13 @@ class ParticleSwarm:
                     for i in range(len(particle)):
                         popDistance += (np.linalg.norm(pop[index - 1][i] - particle[i]) / len(particle))
             popDistance = popDistance / len(pop)
-            print popDistance
+            print "average dist. between particles:", popDistance
         #calc final clusters and print info
+            self.finish_up(gBest)
+
+
+    def finish_up(self, gBest):
+        totalDist = 0
         clust = []
         for i in range(self.numClusters):
             c = []
@@ -84,8 +89,11 @@ class ParticleSwarm:
                 if dist < closest[0]:
                      closest = [dist, i]
             clust[closest[1]].append(d)
+            totalDist += closest[0]
         for i in range(len(clust)):
-            print len(clust[i])
+            print "size of cluster",i, ":", len(clust[i])
+        totalDist = totalDist / len(self.dataset)
+        print "average distance to centroid:", totalDist
         print gBest
 
 
@@ -127,7 +135,7 @@ class Instance:
 def main():
     #create dataset
     dataset = []
-    with open('.\Data\NewSpect.txt', 'r') as dataIn:
+    with open('.\Data\NewSegment.txt', 'r') as dataIn:
         for line in dataIn:
             variables = line.split(" ")
             classifier = []
@@ -143,7 +151,7 @@ def main():
             dataset.append(variables)
 
     #dataset, number pf particles, number of clusters, param1, param2, inertia
-    pso = ParticleSwarm(dataset, 10, 2, 2.0, 2.0, 0.5)
+    pso = ParticleSwarm(dataset, 30, 7, 2.0, 2.0, 0.7)
 
 
 if __name__ == '__main__':
